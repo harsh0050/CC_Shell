@@ -12,6 +12,11 @@ public class Main {
     }
 
     public static void evaluate(String command){
+        if(command.startsWith("exit")){
+            //TODO validate for correctness
+            System.exit(command.charAt(5) - '0');
+            return;
+        }
         System.out.println(command + ": command not found");
     }
 }
