@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -14,6 +15,8 @@ public class Main {
     }
     public static void main(String[] args) throws Exception {
         Scanner s = new Scanner(System.in);
+//        System.out.writeBytes(R.readAllBytes());
+//        runExecutable("ls", "hihihi");
         while (true) {
             System.out.print("$ ");
             String command = s.nextLine();
@@ -29,20 +32,23 @@ public class Main {
     }
 
     public static void evaluate(String[] argv) throws Exception {
-        if (argv[0].equals("exit")) {
-            evaluateExit(argv);
-            return;
-        } else if (argv[0].equals("echo")) {
-            evaluateEcho(argv);
-            return;
-        } else if(argv[0].equals("type")){
-            evaluateType(argv);
-            return;
+        switch (argv[0]) {
+            case "exit" -> evaluateExit(argv);
+            case "echo" -> evaluateEcho(argv);
+            case "type" -> evaluateType(argv);
+            default -> {
+                String execPath = getExecutablePath(argv[0]);
+                if (execPath == null) {
+                    throw new Exception("command not found");
+                }
+//                String[] copyOfArgv = Arrays.copyOf(argv, argv.length);
+//                copyOfArgv[0] = execPath;
+                runExecutable(argv).waitFor();
+            }
         }
-        throw new Exception("command not found");
     }
 
-    public static void evaluateExit(String[] argv) throws Exception {
+    public static void evaluateExit(String... argv) throws Exception {
         Util.validateArgumentCount(2, argv.length);
         if (argv[1].equals("0") || argv[1].equals("1")) {
             int exitCode = Integer.parseInt(argv[1]);
@@ -52,13 +58,13 @@ public class Main {
         }
     }
 
-    public static void evaluateEcho(String[] argv) throws Exception {
+    public static void evaluateEcho(String... argv) throws Exception {
         if(argv.length < 2) throw new Exception("too few arguments");
         for(int i = 1; i<argv.length - 1; i++) System.out.print(argv[i] + " ");
         System.out.println(argv[argv.length - 1]);
     }
 
-    public static void evaluateType(String[] argv) throws Exception {
+    public static void evaluateType(String... argv) throws Exception {
         Util.validateArgumentCount(2, argv.length);
         if(builtinCommandsSet.contains(argv[1])){
             System.out.println(argv[1] + " is a shell builtin");
@@ -77,9 +83,16 @@ public class Main {
         return command.split(" +");
     }
 
+    public static Process runExecutable(String[] argv) throws IOException {
+        ProcessBuilder pb = new ProcessBuilder(argv).inheritIO();
+        return pb.start();
+    }
     public static String getExecutablePath(String command){
-        String[] paths = System.getenv("PATH").split(File.pathSeparator);
+        String pathsString = System.getenv("PATH");
+        if(pathsString == null) return null;
+        String[] paths = pathsString.split(File.pathSeparator);
         for(String path: paths){
+            if(path.trim().isEmpty()) continue;
             if (Files.isDirectory(Path.of(path))) {
                 File f = new File(path + File.separator + command);
                 if(f.exists() && f.canExecute()) return f.getAbsolutePath();
