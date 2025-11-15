@@ -1,7 +1,9 @@
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Scanner;
@@ -11,12 +13,13 @@ public class Main {
 
     static Set<String> builtinCommandsSet;
     static {
-        builtinCommandsSet = new HashSet<>(Arrays.asList("echo", "exit", "type"));
+        builtinCommandsSet = new HashSet<>(Arrays.asList("echo", "exit", "type", "pwd"));
     }
     public static void main(String[] args) throws Exception {
         Scanner s = new Scanner(System.in);
 //        System.out.writeBytes(R.readAllBytes());
 //        runExecutable("ls", "hihihi");
+//        System.out.println(System.getProperty("user.dir"));
         while (true) {
             System.out.print("$ ");
             String command = s.nextLine();
@@ -27,8 +30,6 @@ public class Main {
                 System.out.println(argv[0] + ": " + e.getMessage());
             }
         }
-
-
     }
 
     public static void evaluate(String[] argv) throws Exception {
@@ -36,6 +37,7 @@ public class Main {
             case "exit" -> evaluateExit(argv);
             case "echo" -> evaluateEcho(argv);
             case "type" -> evaluateType(argv);
+            case "pwd" -> evaluatePwd(argv);
             default -> {
                 String execPath = getExecutablePath(argv[0]);
                 if (execPath == null) {
@@ -77,6 +79,11 @@ public class Main {
             }
         }
         System.out.println(argv[1] + ": not found");
+    }
+
+    public static void evaluatePwd(String... argv) throws Exception{
+        Util.validateArgumentCount(1, argv.length);
+        System.out.println(System.getProperty("user.dir"));
     }
 
     public static String[] getArgv(String command){
