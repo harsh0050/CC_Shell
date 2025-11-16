@@ -8,18 +8,13 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class Main {
 
-    static Set<String> builtinCommandsSet = new HashSet<>(Arrays.asList("echo", "exit", "type", "pwd"));
-    static String workingDir = System.getProperty("user.dir");
-    static String userHomeDir = System.getProperty("user.home");
+    static Set<String> builtinCommandsSet = new HashSet<>(Arrays.asList("echo", "exit", "type", "pwd", "cd"));
     public static void main(String[] args) throws Exception {
         Scanner s = new Scanner(System.in);
-//        System.out.writeBytes(R.readAllBytes());
-//        runExecutable("ls", "hihihi");
-//        System.out.println(System.getProperty("user.dir"));
-
         while (true) {
             System.out.print("$ ");
             String command = s.nextLine();
@@ -85,18 +80,13 @@ public class Main {
 
     public static void evaluatePwd(String... argv) throws Exception{
         Util.validateArgumentCount(1, argv.length);
-        System.out.println(workingDir);
+        System.out.println(Navigation.getWorkingDir());
     }
 
     public static void evaluateCd(String... argv) throws Exception {
         Util.validateArgumentCount(2, argv.length);
         String path = argv[1];
-        if(path.startsWith(File.separator)){
-            if(!Files.isDirectory(Path.of(path))){
-                throw new Exception("%s: No such file or directory".formatted(path));
-            }
-            workingDir = path;
-        }
+        Navigation.setWorkingDir(path);
     }
     public static String[] getArgv(String command){
         return command.split(" +");
