@@ -1,6 +1,7 @@
 public class Util {
-    public static void validateArgumentCount(int expected, int found) throws Exception {
-        if(found > expected) throw new Exception("too many arguments");
-        if(found < expected) throw new Exception("too few arguments");
+    public static Result validateArgumentCount(int expected, int found) {
+        if(found > expected) return new Failure("too many arguments");
+        if(found < expected) return new Failure("too few arguments");
+        return new Success();
     }
 }

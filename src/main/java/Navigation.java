@@ -13,29 +13,29 @@ public class Navigation {
     /**
      * @throws NoSuchFileException if the path is not valid.
      */
-    public static void setWorkingDir(String path) throws NoSuchFileException {
+    public static void setWorkingDir(String pathString) throws NoSuchFileException {
         try{
+            Path path = Path.of(pathString);
             if (path.startsWith(File.separator)) {
                 setAbsolutePath(path);
             }else{
                 setRelativePath(path);
             }
         }catch (NoSuchFileException e){
-            throw new NoSuchFileException(path +": " + e.getMessage());
+            throw new NoSuchFileException(null);
         }
     }
 
-    private static void setRelativePath(String path) throws NoSuchFileException{
-        String newPath = workingDir.toString() + File.separator + path;
-        setAbsolutePath(newPath);
+    private static void setRelativePath(Path path) throws NoSuchFileException{
+        setAbsolutePath(workingDir.resolve(path));
     }
 
-    private static void setAbsolutePath(String path) throws NoSuchFileException {
-        if (!Files.isDirectory(Path.of(path))) {
-            throw new NoSuchFileException("No such file or directory");
+    private static void setAbsolutePath(Path path) throws NoSuchFileException {
+        if (!Files.isDirectory(path)) {
+            throw new NoSuchFileException(null);
         }
 
-        workingDir = Path.of(path).normalize();
+        workingDir = path.normalize();
     }
 
     public static String getWorkingDir() {
