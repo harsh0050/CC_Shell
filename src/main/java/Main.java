@@ -11,18 +11,19 @@ import java.util.Set;
 
 public class Main {
 
-    static Set<String> builtinCommandsSet;
-    static {
-        builtinCommandsSet = new HashSet<>(Arrays.asList("echo", "exit", "type", "pwd"));
-    }
+    static Set<String> builtinCommandsSet = new HashSet<>(Arrays.asList("echo", "exit", "type", "pwd"));
+    static String workingDir = System.getProperty("user.dir");
+    static String userHomeDir = System.getProperty("user.home");
     public static void main(String[] args) throws Exception {
         Scanner s = new Scanner(System.in);
 //        System.out.writeBytes(R.readAllBytes());
 //        runExecutable("ls", "hihihi");
 //        System.out.println(System.getProperty("user.dir"));
+
         while (true) {
             System.out.print("$ ");
             String command = s.nextLine();
+            if(command.isBlank()) continue;
             String[] argv = getArgv(command);
             try{
                 evaluate(argv);
@@ -38,6 +39,7 @@ public class Main {
             case "echo" -> evaluateEcho(argv);
             case "type" -> evaluateType(argv);
             case "pwd" -> evaluatePwd(argv);
+            case "cd" -> evaluateCd(argv);
             default -> {
                 String execPath = getExecutablePath(argv[0]);
                 if (execPath == null) {
@@ -83,9 +85,19 @@ public class Main {
 
     public static void evaluatePwd(String... argv) throws Exception{
         Util.validateArgumentCount(1, argv.length);
-        System.out.println(System.getProperty("user.dir"));
+        System.out.println(workingDir);
     }
 
+    public static void evaluateCd(String... argv) throws Exception {
+        Util.validateArgumentCount(2, argv.length);
+        String path = argv[1];
+        if(path.startsWith(File.separator)){
+            if(!Files.isDirectory(Path.of(path))){
+                throw new Exception("%s: No such file or directory".formatted(path));
+            }
+            workingDir = path;
+        }
+    }
     public static String[] getArgv(String command){
         return command.split(" +");
     }
