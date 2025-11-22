@@ -28,7 +28,7 @@ public class Util {
                 return;
             }
         }
-        if(i == command.length() && !quoteOpen) ls.add(sb.toString());
+        if(!sb.isEmpty()) ls.add(sb.toString());
     }
     public static Result validateArgumentCount(int expected, int found) {
         if(found > expected) return new Failure(Constants.TOO_MANY_ARGUMENTS);
