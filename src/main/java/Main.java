@@ -15,7 +15,7 @@ public class Main {
             System.out.print("$ ");
             String command = s.nextLine();
             if (command.isBlank()) continue;
-            String[] argv = getArgv(command);
+            String[] argv = Util.getArgv(command);
             try {
                 evaluate(argv);
             } catch (Exception e) {
@@ -49,10 +49,10 @@ public class Main {
     }
 
     public static Result evaluateExit(String... argv) {
-        if(argv.length > 2) {
+        if (argv.length > 2) {
             return new Failure("%s: %s".formatted(argv[0], Constants.TOO_MANY_ARGUMENTS));
         }
-        if(argv.length == 1) {
+        if (argv.length == 1) {
             System.exit(0);
         }
         if (argv[1].equals("0") || argv[1].equals("1")) {
@@ -87,16 +87,16 @@ public class Main {
     }
 
     public static Result evaluatePwd(String... argv) {
-        if(Util.validateArgumentCount(1, argv.length) instanceof Failure f){
-            return new Failure(argv[0] + ": "+ f.message);
+        if (Util.validateArgumentCount(1, argv.length) instanceof Failure f) {
+            return new Failure(argv[0] + ": " + f.message);
         }
         System.out.println(Navigation.getWorkingDir());
         return new Success();
     }
 
     public static Result evaluateCd(String... argv) {
-        if(Util.validateArgumentCount(2, argv.length) instanceof Failure f){
-            return new Failure(argv[0] + ": "+ f.message);
+        if (Util.validateArgumentCount(2, argv.length) instanceof Failure f) {
+            return new Failure(argv[0] + ": " + f.message);
         }
         String path = argv[1];
         try {
@@ -107,9 +107,7 @@ public class Main {
         }
     }
 
-    public static String[] getArgv(String command) {
-        return command.split(" +");
-    }
+
 
     public static Result runExecutable(String[] argv, String workingDir) throws IOException {
         String execPath = getExecutablePath(argv[0]);
