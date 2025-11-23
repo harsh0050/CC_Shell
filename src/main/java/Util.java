@@ -10,23 +10,26 @@ public class Util {
     }
     private static void getArgv(String command, int start, List<String> ls) {
         if (start == command.length()) return;
-        boolean quoteOpen = false;
+        boolean singleQuoteOpen = false;
+        boolean doubleQuoteOpen = false;
         int i = start;
         StringBuilder sb = new StringBuilder();
         while (i < command.length()) {
             char currChar = command.charAt(i++);
-            if (currChar == '\'') {
-                quoteOpen = !quoteOpen;
+            if(currChar == '\'' && !doubleQuoteOpen){
+                singleQuoteOpen = !singleQuoteOpen;
                 continue;
             }
-            if (quoteOpen || currChar != ' ') {
-                sb.append(currChar);
+            if(currChar == '\"' && !singleQuoteOpen){
+                doubleQuoteOpen = !doubleQuoteOpen;
+                continue;
             }
-            if (currChar == ' ' && !quoteOpen) {
+            if(currChar == ' ' && !(singleQuoteOpen || doubleQuoteOpen)){
                 if (!sb.isEmpty()) ls.add(sb.toString());
                 getArgv(command, i, ls);
                 return;
             }
+            sb.append(currChar);
         }
         if(!sb.isEmpty()) ls.add(sb.toString());
     }
