@@ -12,6 +12,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Scanner s = new Scanner(System.in);
+//        System.out.println(Arrays.toString(Util.getArgv("\"mixed\\\"quote'world'\\\\\"")));
         while (true) {
             System.out.print("$ ");
             String command = s.nextLine();
