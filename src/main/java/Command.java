@@ -1,9 +1,30 @@
 import java.util.LinkedList;
 import java.util.List;
 
-public class Util {
+public class Command {
+    private final String[] argv;
 
-    public static String[] getArgv(String command) {
+    public Command(String command) {
+        argv = getArgv(command);
+    }
+
+    public int run() {
+        if(argv.length == 0) return 0;
+        try{
+            Executable exec = BuiltIn.fromCommand(argv[0]);
+            if (exec == null) {
+                exec = new ExternalProgram(argv[0], Navigation.getWorkingDir());
+            }
+            exec.execute(argv);
+            return 0;
+        }catch (Exception e){
+            e.printStackTrace();
+            return 1;
+        }
+    }
+
+
+    private static String[] getArgv(String command) {
         List<String> argv = new LinkedList<>();
         //todo 'quote>' functionality
         getArgv(command, 0, argv);
@@ -40,12 +61,12 @@ public class Util {
                 }
                 currChar = command.charAt(i++);
             }
-            if(currChar == '\\' && doubleQuoteOpen){ //inside of double quotes (conditional escape)
-                if(i >= command.length()){
+            if (currChar == '\\' && doubleQuoteOpen) { //inside of double quotes (conditional escape)
+                if (i >= command.length()) {
                     throw new IllegalArgumentException("Expected the escaped character at the end");
                 }
-                currChar = switch (command.charAt(i)){
-                    case '"', '\\'  -> command.charAt(i++);
+                currChar = switch (command.charAt(i)) {
+                    case '"', '\\' -> command.charAt(i++);
                     default -> currChar;
                 };
             }
