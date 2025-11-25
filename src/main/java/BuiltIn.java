@@ -1,20 +1,23 @@
+import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 
 public enum BuiltIn implements Executable{
     ECHO("echo", 0, Integer.MAX_VALUE) {
         @Override
-        public int execute(String... argv) {
-            int code = super.execute(argv);
+        public int execute(String[] argv, InputOutputErrorStreams streams) throws IOException {
+            int code = super.execute(argv, streams);
             if (code != 0) return code;
-            for (int i = 1; i < argv.length - 1; i++) System.out.print(argv[i] + " ");
-            System.out.println(argv[argv.length - 1]);
+            for (int i = 1; i < argv.length - 1; i++) {
+                streams.out.write(argv[i] + " ");
+            }
+            streams.out.writeln(argv[argv.length - 1]);
             return 0;
         }
     },
     EXIT("exit", 0, 1) {
         @Override
-        public int execute(String... argv) {
-            int code = super.execute(argv);
+        public int execute(String[] argv, InputOutputErrorStreams streams) throws IOException {
+            int code = super.execute(argv, streams);
             if (code != 0) return code;
             if (argv.length == 1) {
                 System.exit(0);
@@ -23,45 +26,45 @@ public enum BuiltIn implements Executable{
                 int exitCode = Integer.parseInt(argv[1]);
                 System.exit(exitCode);
             }
-            System.out.println(this.command + "invalid exit code");
+            streams.out.writeln(this.command + "invalid exit code");
             return 1;
         }
     },
     TYPE("type", 1, 1) {
         @Override
-        public int execute(String... argv) {
-            int code = super.execute(argv);
+        public int execute(String[] argv, InputOutputErrorStreams streams) throws IOException {
+            int code = super.execute(argv, streams);
             if (code != 0) return code;
             for (BuiltIn b : values()) {
                 if (b.command.equals(argv[1])) {
-                    System.out.println(argv[1] + " is a shell builtin");
+                    streams.out.writeln(argv[1] + " is a shell builtin");
                     return 0;
                 }
             }
             String path = ExternalProgram.getFilePath(argv[1]);
             if (path != null) {
-                System.out.println(argv[1] + " is " + path);
+                streams.out.writeln(argv[1] + " is " + path);
                 return 0;
             }
 
-            System.out.println(argv[1] + ": not found");
+            streams.err.writeln(argv[1] + ": not found");
             return 1;
         }
     },
     PWD("pwd", 0, 0) {
         @Override
-        public int execute(String... argv) {
-            int code = super.execute(argv);
+        public int execute(String[] argv, InputOutputErrorStreams streams) throws IOException {
+            int code = super.execute(argv, streams);
             if (code != 0) return code;
 
-            System.out.println(Navigation.getWorkingDir());
+            streams.out.writeln(Navigation.getWorkingDir());
             return 0;
         }
     },
     CD("cd", 1, 1) {
         @Override
-        public int execute(String... argv) {
-            int code = super.execute(argv);
+        public int execute(String[] argv, InputOutputErrorStreams streams) throws IOException {
+            int code = super.execute(argv, streams);
             if (code != 0) return code;
 
             String path = argv[1];
@@ -69,7 +72,7 @@ public enum BuiltIn implements Executable{
                 Navigation.setWorkingDir(path);
                 return 0;
             } catch (NoSuchFileException e) {
-                System.out.println("%s: %s: %s".formatted(argv[0], argv[1], Constants.NO_SUCH_FILE_OR_DIRECTORY));
+                streams.out.writeln("%s: %s: %s".formatted(argv[0], argv[1], Constants.NO_SUCH_FILE_OR_DIRECTORY));
                 return 1;
             }
 
@@ -86,7 +89,7 @@ public enum BuiltIn implements Executable{
     }
 
     @Override
-    public int execute(String... argv) {
+    public int execute(String[] argv, InputOutputErrorStreams streams) throws IOException{
         if (argv.length - 1 < minArguments) {
             System.out.println(Constants.TOO_FEW_ARGUMENTS);
             return 1;

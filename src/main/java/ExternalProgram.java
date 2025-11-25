@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 
 public class ExternalProgram implements Executable {
-    private String workingDir;
+    private final String workingDir;
 
     /**
      * @throws FileNotFoundException If a file with the name {@code command} is not found in directories mentioned in {@code PATH}
@@ -13,23 +13,51 @@ public class ExternalProgram implements Executable {
         this.workingDir = workingDir;
         if (getFilePath(command) == null) {
             throw new FileNotFoundException();
-
         }
     }
 
-    public int execute(String... argv){
+    public int execute(String[] argv, InputOutputErrorStreams streams) throws IOException {
         String execPath = getFilePath(argv[0]);
         if (execPath == null) {
-            System.out.println("%s: %s".formatted(argv[0], Constants.COMMAND_NOT_FOUND));
+            streams.out.writeln("%s: %s".formatted(argv[0], Constants.COMMAND_NOT_FOUND));
             return 1;
         }
         File dir = new File(workingDir);
-        ProcessBuilder pb = new ProcessBuilder(argv).directory(dir).inheritIO();
-        try{
-            return pb.start().waitFor();
-        }catch (Exception e){
-            System.out.println(Arrays.toString(argv));
-            e.printStackTrace();
+        //todo add support for input redirection (from something to this command)
+        ProcessBuilder pb = new ProcessBuilder(argv).directory(dir).redirectInput(ProcessBuilder.Redirect.INHERIT);
+        try {
+            Process p = pb.start();
+            Thread t1 = new Thread(() -> {
+                try (InputStream errorStream = p.getErrorStream()) {
+                    int data;
+                    while ((data = errorStream.read()) != -1) {
+                        streams.err.write(data);
+                    }
+                    streams.err.flush();
+                } catch (IOException e) { //todo handle every caught exception (in future)
+                    e.printStackTrace();
+                }
+            });
+
+            Thread t2 = new Thread(() -> {
+                try (InputStream inputStream = p.getInputStream()) {
+                    int data;
+                    while ((data = inputStream.read()) != -1) {
+                        streams.out.write(data);
+                    }
+                    streams.out.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            t1.start();
+            t2.start();
+            t1.join();
+            t2.join();
+            return p.waitFor();
+        } catch (Exception e) {
+            streams.out.writeln(Arrays.toString(argv));
+            Util.printStackTrace(e, streams.err);
             return 1;
         }
     }
