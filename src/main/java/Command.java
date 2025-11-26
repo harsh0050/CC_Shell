@@ -1,17 +1,16 @@
 import java.io.*;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public class Command {
     private String[] argv;
-    private BufferedWriterWrapper outputStreamWriter;
-    private BufferedWriterWrapper errorStreamWriter;
+    private PrintStreamWrapper outputStream;
+    private PrintStreamWrapper errorStream;
     private BufferedReader inputStreamReader;
 
     public Command(String command) throws IllegalArgumentException, IOException {
-        this.outputStreamWriter = BufferedWriterWrapper.fromPrintStream(System.out, true, false);
-        this.errorStreamWriter = BufferedWriterWrapper.fromPrintStream(System.err, true, false);
+        this.outputStream = new PrintStreamWrapper(System.out, false);
+        this.errorStream = new PrintStreamWrapper(System.err, false);
         this.inputStreamReader = new BufferedReader(new InputStreamReader(System.in));
 
         List<Token> tokens = InputTokenizer.tokenize(command);
@@ -23,18 +22,15 @@ public class Command {
         try {
             Executable exec = BuiltIn.fromCommand(argv[0]);
             if (exec == null) {
-                try {
-                    exec = new ExternalProgram(argv[0], Navigation.getWorkingDir());
-                } catch (FileNotFoundException e) {
-                    errorStreamWriter.writeln("%s: %s".formatted(argv[0], Constants.COMMAND_NOT_FOUND)); // error caught my outside try-catch
-                    return 1;
-                }
+                exec = new ExternalProgram(argv[0], Navigation.getWorkingDir());
             }
-            InputOutputErrorStreams streams = new InputOutputErrorStreams(inputStreamReader, outputStreamWriter, errorStreamWriter);
+            InputOutputErrorStreams streams = new InputOutputErrorStreams(inputStreamReader, outputStream, errorStream);
             exec.execute(argv, streams);
-            outputStreamWriter.flush();
-            errorStreamWriter.flush();
+            flushStreams();
             return 0;
+        } catch (FileNotFoundException e) {
+            errorStream.println("%s: %s".formatted(argv[0], Constants.COMMAND_NOT_FOUND)); // error caught my outside try-catch
+            return 1;
         } catch (Exception e) {
             e.printStackTrace();
             return 1;
@@ -52,12 +48,12 @@ public class Command {
             } else if (curr.type == TokenType.REDIRECT) {
                 Token next = tokens.get(i + 1);
                 boolean append = curr.value.contains(">>");
-                switch (curr.value){
-                    case "1>", ">", "1>>", ">>" ->{
-                        this.outputStreamWriter = BufferedWriterWrapper.fromFile(next.value, false, true, append); //throws IOException
+                switch (curr.value) {
+                    case "1>", ">", "1>>", ">>" -> {
+                        this.outputStream = new PrintStreamWrapper(next.value, true, append); //throws IOException
                     }
                     case "2>", "2>>" -> {
-                        this.errorStreamWriter = BufferedWriterWrapper.fromFile(next.value, false, true, append); //throws IOException
+                        this.errorStream = new PrintStreamWrapper(next.value, true, append); //throws IOException
                     }
                 }
                 break;
@@ -70,12 +66,13 @@ public class Command {
     //todo 'quote>' functionality
 
     private void closeStreams() {
-        try {
-            errorStreamWriter.close();
-            outputStreamWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        errorStream.close();
+        outputStream.close();
+    }
+
+    private void flushStreams() {
+        errorStream.flush();
+        outputStream.flush();
     }
 
 }

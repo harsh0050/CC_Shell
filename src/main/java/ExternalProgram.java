@@ -19,7 +19,7 @@ public class ExternalProgram implements Executable {
     public int execute(String[] argv, InputOutputErrorStreams streams) throws IOException {
         String execPath = getFilePath(argv[0]);
         if (execPath == null) {
-            streams.out.writeln("%s: %s".formatted(argv[0], Constants.COMMAND_NOT_FOUND));
+            streams.out.println("%s: %s".formatted(argv[0], Constants.COMMAND_NOT_FOUND));
             return 1;
         }
         File dir = new File(workingDir);
@@ -56,8 +56,8 @@ public class ExternalProgram implements Executable {
             t2.join();
             return p.waitFor();
         } catch (Exception e) {
-            streams.out.writeln(Arrays.toString(argv));
-            Util.printStackTrace(e, streams.err);
+            streams.out.println(Arrays.toString(argv));
+            e.printStackTrace(streams.err.getStream());
             return 1;
         }
     }

@@ -8,9 +8,8 @@ import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
+    static void main(String[] args) {
         Scanner s = new Scanner(System.in);
-//
         while (true) {
             System.out.print("$ ");
             String commandString = s.nextLine();

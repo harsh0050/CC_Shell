@@ -8,9 +8,9 @@ public enum BuiltIn implements Executable{
             int code = super.execute(argv, streams);
             if (code != 0) return code;
             for (int i = 1; i < argv.length - 1; i++) {
-                streams.out.write(argv[i] + " ");
+                streams.out.print(argv[i] + " ");
             }
-            streams.out.writeln(argv[argv.length - 1]);
+            streams.out.println(argv[argv.length - 1]);
             return 0;
         }
     },
@@ -26,7 +26,7 @@ public enum BuiltIn implements Executable{
                 int exitCode = Integer.parseInt(argv[1]);
                 System.exit(exitCode);
             }
-            streams.out.writeln(this.command + "invalid exit code");
+            streams.out.println(this.command + "invalid exit code");
             return 1;
         }
     },
@@ -37,17 +37,17 @@ public enum BuiltIn implements Executable{
             if (code != 0) return code;
             for (BuiltIn b : values()) {
                 if (b.command.equals(argv[1])) {
-                    streams.out.writeln(argv[1] + " is a shell builtin");
+                    streams.out.println(argv[1] + " is a shell builtin");
                     return 0;
                 }
             }
             String path = ExternalProgram.getFilePath(argv[1]);
             if (path != null) {
-                streams.out.writeln(argv[1] + " is " + path);
+                streams.out.println(argv[1] + " is " + path);
                 return 0;
             }
 
-            streams.err.writeln(argv[1] + ": not found");
+            streams.err.println(argv[1] + ": not found");
             return 1;
         }
     },
@@ -57,7 +57,7 @@ public enum BuiltIn implements Executable{
             int code = super.execute(argv, streams);
             if (code != 0) return code;
 
-            streams.out.writeln(Navigation.getWorkingDir());
+            streams.out.println(Navigation.getWorkingDir());
             return 0;
         }
     },
@@ -72,7 +72,7 @@ public enum BuiltIn implements Executable{
                 Navigation.setWorkingDir(path);
                 return 0;
             } catch (NoSuchFileException e) {
-                streams.out.writeln("%s: %s: %s".formatted(argv[0], argv[1], Constants.NO_SUCH_FILE_OR_DIRECTORY));
+                streams.out.println("%s: %s: %s".formatted(argv[0], argv[1], Constants.NO_SUCH_FILE_OR_DIRECTORY));
                 return 1;
             }
 
