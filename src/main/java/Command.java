@@ -50,12 +50,15 @@ public class Command {
             if (curr.type == TokenType.LITERAL) {
                 argvList.add(curr.value);
             } else if (curr.type == TokenType.REDIRECT) {
-                if (curr.value.startsWith("1") || curr.value.startsWith(">")) {//output redirect
-                    Token next = tokens.get(i + 1);
-                    this.outputStreamWriter = BufferedWriterWrapper.fromFile(next.value, false, true); //throws IOException
-                } else if (curr.value.startsWith("2")) {
-                    Token next = tokens.get(i + 1);
-                    this.errorStreamWriter = BufferedWriterWrapper.fromFile(next.value, false, true); //throws IOException
+                Token next = tokens.get(i + 1);
+                boolean append = curr.value.contains(">>");
+                switch (curr.value){
+                    case "1>", ">", "1>>", ">>" ->{
+                        this.outputStreamWriter = BufferedWriterWrapper.fromFile(next.value, false, true, append); //throws IOException
+                    }
+                    case "2>", "2>>" -> {
+                        this.errorStreamWriter = BufferedWriterWrapper.fromFile(next.value, false, true, append); //throws IOException
+                    }
                 }
                 break;
             }

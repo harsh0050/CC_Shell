@@ -16,8 +16,8 @@ public class BufferedWriterWrapper{
         return new BufferedWriterWrapper(new BufferedWriter(new OutputStreamWriter(printStream)), autoFlush, shouldClose);
 
     }
-    public static BufferedWriterWrapper fromFile(String filePath, boolean autoFlush, boolean shouldClose) throws IOException{
-        return new BufferedWriterWrapper(new BufferedWriter(new FileWriter(filePath)), autoFlush, shouldClose);
+    public static BufferedWriterWrapper fromFile(String filePath, boolean autoFlush, boolean shouldClose, boolean append) throws IOException{
+        return new BufferedWriterWrapper(new BufferedWriter(new FileWriter(filePath, append)), autoFlush, shouldClose);
     }
 
 
