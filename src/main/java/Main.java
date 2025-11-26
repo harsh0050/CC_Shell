@@ -14,8 +14,17 @@ public class Main {
         while (true) {
             System.out.print("$ ");
             String commandString = s.nextLine();
-            Command command = new Command(commandString);
-            command.run();
+
+            try {
+                Command command = new Command(commandString);
+                command.run();
+            } catch (Exception e){
+                if(!e.getLocalizedMessage().isBlank()){
+                    System.err.println(e.getLocalizedMessage());
+                }else {
+                    e.printStackTrace(System.err);
+                }
+            }
         }
     }
 
