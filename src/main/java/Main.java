@@ -1,3 +1,4 @@
+import org.jline.builtins.Completers;
 import org.jline.reader.*;
 import org.jline.reader.impl.DefaultParser;
 import org.jline.reader.impl.completer.AggregateCompleter;
@@ -37,9 +38,15 @@ public class Main {
     }
 
     private static LineReader buildLineReader() throws IOException {
-        Completer completer = new AggregateCompleter(
-                new EnumCompleter(BuiltIn.class)
-        );
+        LinkedList<Completer> completers = new LinkedList<>();
+        completers.add(new EnumCompleter(BuiltIn.class));
+
+        String allPaths = System.getenv(Constants.PATH_ENV_IDENTIFIER);
+        if (allPaths == null) return null;
+        for (String path : ExternalProgram.getValidDirPaths(allPaths)) {
+            completers.add(new Completers.FilesCompleter(Path.of(path)));
+        }
+        Completer completer = new AggregateCompleter(completers);
 
         return LineReaderBuilder.builder()
                 .completer(completer)

@@ -2,6 +2,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ExternalProgram implements Executable {
     private final String workingDir;
@@ -65,14 +67,23 @@ public class ExternalProgram implements Executable {
     public static String getFilePath(String command) {
         String pathsString = System.getenv(Constants.PATH_ENV_IDENTIFIER);
         if (pathsString == null) return null;
-        String[] paths = pathsString.split(File.pathSeparator);
+        List<String> validDirs = getValidDirPaths(pathsString);
+        for(String path: validDirs){
+            File f = new File(path + File.separator + command);
+            if (f.exists() && f.canExecute()) return f.getAbsolutePath();
+        }
+        return null;
+    }
+
+    public static List<String> getValidDirPaths(String allPaths) {
+        List<String> ls = new LinkedList<>();
+        String[] paths = allPaths.split(File.pathSeparator);
         for (String path : paths) {
             if (path.trim().isEmpty()) continue;
             if (Files.isDirectory(Path.of(path))) {
-                File f = new File(path + File.separator + command);
-                if (f.exists() && f.canExecute()) return f.getAbsolutePath();
+                ls.add(path);
             }
         }
-        return null;
+        return ls;
     }
 }
