@@ -16,12 +16,8 @@ public class ShellHistory extends DefaultHistory {
         this.historyPrintStream = historyPrintStream;
     }
 
-    public static ShellHistory getInstance() throws IOException {
-        if (INSTANCE == null) {
-            INSTANCE = new ShellHistory(new PrintStream(new FileOutputStream(Constants.HISTORY_FILE_PATH, true)));
-            INSTANCE.loadHistory();
-        }
-        return INSTANCE;
+    public static ShellHistory getInstance() throws RuntimeException {
+        return Holder.INSTANCE;
     }
 
     private void loadHistory() throws IOException {
@@ -29,6 +25,18 @@ public class ShellHistory extends DefaultHistory {
             String line;
             while((line = reader.readLine()) != null){
                 super.add(Instant.MIN, line);
+            }
+        }
+    }
+
+    private static class Holder{
+        static final ShellHistory INSTANCE;
+
+        static {
+            try {
+                INSTANCE = new ShellHistory(new PrintStream(new FileOutputStream(Constants.HISTORY_FILE_PATH, true)));
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
             }
         }
     }
