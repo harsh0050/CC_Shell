@@ -70,6 +70,25 @@ public class ShellLineReader {
         sb.delete(sb.length() - delimiter.length(), sb.length());
         return sb.toString();
     }
+    private static String lcp(List<Candidate> candidates){
+        if(candidates.isEmpty()) return null;
+        char[] string = candidates.getFirst().value().toCharArray();
+        for(Candidate candidate: candidates){
+            String curr = candidate.value();
+            int len = Math.min(curr.length(), string.length);
+            for(int j =0; j<len; j++){
+                if(string[j] == '\0') break;
+                if(string[j] == curr.charAt(j)) continue;
+                string[j] = '\0';
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        for(char ch: string){
+            if(ch == '\0') break;
+            sb.append(ch);
+        }
+        return sb.isEmpty() ? null : sb.toString();
+    }
 
     private Widget suggestionWidget() {
         return new Widget() {
@@ -94,6 +113,13 @@ public class ShellLineReader {
                 if (candidates.size() == 1) {
                     String append = candidates.getFirst().value().substring(parsedLine.word().length());
                     lineReader.getBuffer().write(append + " ");
+                    return true;
+                }
+                String lcp = lcp(candidates);
+                if(lcp != null && !lcp.equals(parsedLine.word())){
+                    String append = lcp.substring(parsedLine.word().length());
+                    lineReader.getBuffer().write(append);
+                    tabCount = 0;
                     return true;
                 }
                 if (tabCount == 1) {

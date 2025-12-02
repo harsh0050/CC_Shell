@@ -1,5 +1,4 @@
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 
 public class OutputTest {
     static void main() throws IOException, InterruptedException {
@@ -9,6 +8,7 @@ public class OutputTest {
 //        bf.write(226);
 //        bf.write(156);
 //        bf.write(147);
+        System.out.println(new String(new char[]{'a','\0','b'}));
 
 //        bf.flush();
     }
