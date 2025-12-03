@@ -1,3 +1,7 @@
+package shell;
+
+import shell.io.InputOutputErrorStreams;
+
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 

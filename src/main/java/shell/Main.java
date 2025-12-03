@@ -1,3 +1,8 @@
+package shell;
+
+import shell.io.ShellLineReader;
+
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -8,8 +13,16 @@ public class Main {
             ShellLineReader lineReader = new ShellLineReader();
             while (true) {
                 String commandString = lineReader.readLine("$ ");
-                Command command = new Command(commandString);
-                command.run();
+                List<Command> commands = Command.getCommands(commandString);
+                if(commands.size() == 1){
+                    commands.getFirst().run();
+                    continue;
+                }
+                if(commands.size() == 2){
+//                    commands.getFirst().
+                }
+//                shell.Command command = new shell.Command(commandString);
+//                command.run();
             }
         } catch (Exception e) {
             if (!e.getLocalizedMessage().isBlank()) {

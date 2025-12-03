@@ -1,3 +1,7 @@
+package shell;
+
+import shell.io.InputOutputErrorStreams;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -56,10 +60,15 @@ public class ExternalProgram implements Executable {
             t2.start();
             t1.join();
             t2.join();
+//            OutputStream op = OutputStream.nullOutputStream();
+//            op.wri
+//            new PipedInputStream()
             return p.waitFor();
         } catch (Exception e) {
-            streams.out.println(Arrays.toString(argv));
-            e.printStackTrace(streams.err.getStream());
+            streams.err.println(Arrays.toString(argv));
+            for(StackTraceElement stackTraceElement : e.getStackTrace()){
+                streams.err.println(stackTraceElement.toString());
+            }
             return 1;
         }
     }

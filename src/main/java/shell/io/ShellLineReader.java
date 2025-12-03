@@ -1,3 +1,5 @@
+package shell.io;
+
 import org.jline.builtins.Completers;
 import org.jline.reader.*;
 import org.jline.reader.impl.DefaultParser;
@@ -6,6 +8,10 @@ import org.jline.reader.impl.completer.EnumCompleter;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.InfoCmp;
+import shell.BuiltIn;
+import shell.Constants;
+import shell.ExternalProgram;
+import shell.ShellHistory;
 
 import java.io.IOException;
 import java.nio.file.Path;

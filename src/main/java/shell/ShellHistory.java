@@ -1,8 +1,8 @@
-import org.jline.reader.LineReader;
+package shell;
+
 import org.jline.reader.impl.history.DefaultHistory;
 
 import java.io.*;
-import java.nio.file.Path;
 import java.time.Instant;
 
 public class ShellHistory extends DefaultHistory {

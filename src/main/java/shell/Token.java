@@ -1,3 +1,5 @@
+package shell;
+
 public class Token {
     public TokenType type;
     public String value;
@@ -8,5 +10,5 @@ public class Token {
     }
 }
 enum TokenType{
-    REDIRECT, LITERAL
+    REDIRECT, LITERAL, PIPE
 }

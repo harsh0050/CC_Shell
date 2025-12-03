@@ -1,3 +1,5 @@
+package shell;
+
 public class Constants {
     public static final String TOO_FEW_ARGUMENTS = "too few arguments";
     public static final String TOO_MANY_ARGUMENTS = "too many arguments";
